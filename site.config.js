@@ -30,9 +30,9 @@ export default {
   // The four big tiles. "telegram", "YouTube"... are only samples: put your own, or "" to hide one.
   // Members / subscribers / stars are fetched automatically.
   social: {
-    telegram: "telegram", //      public channel username
+    telegram: "@pdnczone", //      public channel username
     youtube: "YouTube", //        channel handle
-    instagram: "instagram",
+    instagram: "@pdnczone",
     github: "github",
     featuredRepo: "docs" //       one of your GitHub repositories to show as a card, "" to hide it
   },
