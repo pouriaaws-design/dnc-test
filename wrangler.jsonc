@@ -1,0 +1,15 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // Worker name: also the first part of your free address (NAME.ACCOUNT.workers.dev)
+  "name": "dnc-test",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-10-01",
+  // Keep variables that were set in the Cloudflare dashboard
+  "keep_vars": true,
+  "rules": [{ "type": "Text", "globs": ["**/*.html"], "fallthrough": true }],
+  "assets": { "directory": "./public" },
+  // No id needed: Cloudflare creates the KV namespace on the first deploy
+  "kv_namespaces": [{ "binding": "STATS_KV","id": "95fd4c113ee64d3a92d62f8aa19d7e7d" }],
+  "triggers": { "crons": ["* * * * *"] },
+  "observability": { "enabled": true }
+}

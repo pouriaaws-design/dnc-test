@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-lang="fa">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex,nofollow" />
+<title>{{name}} · Overlay</title>
+<link rel="stylesheet" href="/fonts.css" />
+<style>
+  *{ box-sizing: border-box; }
+  [hidden]{ display:none !important; }
+  html{ font-size: calc(16px * var(--scale, 1)); }
+  html,body{ margin:0; height:100%; overflow:hidden; background: transparent; color:#f2f4f7; font-family:'Vazirmatn',sans-serif; }
+  html[data-lang="en"] body{ font-family:'Inter','Vazirmatn',sans-serif; }
+  body.preview{ background: radial-gradient(circle at 30% 20%, #101522, #07090d 70%); }
+  #confetti{ position:fixed; inset:0; width:100%; height:100%; pointer-events:none; z-index:9; }
+  .stage{ position:fixed; inset:0; }
+
+  @keyframes pulse-dot{ 0%,100%{ box-shadow:0 0 4px rgb(var(--c,250,190,88)); transform:scale(1); } 50%{ box-shadow:0 0 12px rgb(var(--c,250,190,88)); transform:scale(1.2); } }
+  @keyframes crown-float{ 0%,100%{ transform:translateY(0) scale(1); } 50%{ transform:translateY(-4px) scale(1.1); } }
+  @keyframes fade-up{ from{ opacity:0; transform:translateY(10px); } }
+  @keyframes crown-shimmer{ 20%,100%{ transform:translateX(100%); } }
+  .cpulse{ display:inline-block; width:.5rem; height:.5rem; border-radius:50%; background:rgb(var(--c,250,190,88)); box-shadow:0 0 8px rgb(var(--c,250,190,88)); animation:pulse-dot 2s ease-in-out infinite; flex-shrink:0; }
+
+  /* ── Donation panel ── */
+  .panel{
+    position:absolute; left:2rem; bottom:2rem; width:29rem;
+    display:flex; flex-direction:column; gap:.9rem; padding:1.15rem 1.2rem 1rem;
+    border-radius:1.6rem;
+    background: radial-gradient(ellipse at 50% 0%, rgba(250,190,88,.14), transparent 70%), rgba(12,14,20,.88);
+    border:1px solid rgba(250,190,88,.42);
+    box-shadow:0 18px 50px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.08);
+    animation: fade-up .8s ease backwards;
+  }
+  .pos-right .panel{ left:auto; right:2rem; }
+  .phead{ display:flex; align-items:center; justify-content:space-between; gap:.6rem; }
+  .ptitle{ display:flex; align-items:center; gap:.5rem; font-size:1.05rem; font-weight:800; color:#fabe58; text-shadow:0 0 20px rgba(250,190,88,.4); }
+  .dnums{ display:flex; align-items:baseline; gap:.4rem; direction:ltr; font:600 .95rem 'JetBrains Mono',monospace; color:#8d97a3; }
+  .dnums b{ color:#fff; font-variant-numeric:tabular-nums; }
+  .dnums em{ font:500 .78rem 'Vazirmatn','Inter',sans-serif; font-style:normal; color:#fabe58; }
+  .goalname{ display:flex; align-items:center; gap:.45rem; font-size:.9rem; color:#c9d1db; }
+  .goalname b{ color:#fabe58; font-weight:700; }
+  .goalname span{ color:#fff; font-weight:600; min-width:0; overflow-wrap:anywhere; }
+
+  .tank{ position:relative; height:2rem; border-radius:999px; overflow:hidden; background:rgba(0,0,0,.55); border:1px solid rgba(250,190,88,.38); box-shadow:inset 0 2px 10px rgba(0,0,0,.7), 0 0 18px rgba(250,190,88,.12); }
+  .fill{ position:absolute; inset-block:0; inset-inline-start:0; width:0; border-radius:inherit; overflow:hidden; background:linear-gradient(90deg,#f59e0b,#fbbf24); box-shadow:0 0 24px rgba(250,190,88,.65); transition:width 1.4s cubic-bezier(.2,.8,.2,1); }
+  html[dir="rtl"] .fill{ background:linear-gradient(270deg,#f59e0b,#fbbf24); }
+  .fill::before{ content:""; position:absolute; inset:0; background:repeating-linear-gradient(115deg,rgba(255,255,255,.22) 0 10px,transparent 10px 20px); background-size:28px 100%; animation:stripes 1.2s linear infinite; }
+  .fill::after{ content:""; position:absolute; inset-block:0; inset-inline-end:0; width:14px; background:rgba(255,255,255,.8); filter:blur(6px); }
+  .tick{ position:absolute; top:.4rem; bottom:.4rem; width:1px; background:rgba(255,255,255,.18); }
+  .tpct{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; direction:ltr; font:700 .88rem 'JetBrains Mono',monospace; text-shadow:0 1px 6px rgba(0,0,0,.85); color:#fff; }
+
+  .podium{ display:grid; grid-template-columns:1fr 1fr; gap:.6rem; margin-top:.15rem; }
+  .podium:empty{ display:none; }
+  .pod{ position:relative; min-width:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; gap:.3rem; padding:.75rem .6rem; border-radius:1rem; background:rgba(255,255,255,.045); border:1px solid rgba(255,255,255,.1); animation: fade-up .6s ease backwards; overflow:hidden; }
+  .pod.p1{ grid-column:1 / -1; }
+  .pod.p2{ border-color:rgba(226,232,240,.38); background:linear-gradient(180deg,rgba(226,232,240,.12),rgba(226,232,240,.02)); }
+  .pod.p3{ border-color:rgba(217,119,6,.42); background:linear-gradient(180deg,rgba(217,119,6,.15),rgba(217,119,6,.02)); }
+  .pod-top{ display:flex; align-items:center; justify-content:center; gap:.4rem; }
+  .pod .medal{ font-size:1.3rem; }
+  .pod.p1 .medal{ animation: crown-float 2.4s ease-in-out infinite; filter:drop-shadow(0 0 10px rgba(250,190,88,.85)); }
+  .crown-badge{ display:inline-flex; align-items:center; border-radius:999px; }
+  .pod .pn{ width:100%; font-weight:700; font-size:.95rem; color:#fff; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; line-height:1.3; }
+  .pod .pa{ font:700 .84rem 'JetBrains Mono',monospace; color:#fabe58; direction:ltr; }
+  .tunit{ font:500 .72rem 'Vazirmatn','Inter',sans-serif; font-style:normal; color:#8d97a3; margin-inline-start:.2rem; }
+  .pod.p1::after{ content:""; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,.16),transparent); transform:translateX(-100%); animation:crown-shimmer 3.2s infinite; pointer-events:none; }
+
+  .dlast{ display:flex; align-items:center; gap:.5rem; padding:.6rem .9rem; border-radius:.9rem; font-size:.86rem; background:linear-gradient(90deg,rgba(250,190,88,.07),rgba(250,190,88,.14),rgba(250,190,88,.07)); border:1px solid rgba(250,190,88,.3); }
+  .dlast .lbl{ color:#8d97a3; flex-shrink:0; }
+  .dlast .who{ color:#fff; font-weight:700; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .dlast .amt{ margin-inline-start:auto; direction:ltr; font:700 .84rem 'JetBrains Mono',monospace; color:#fabe58; flex-shrink:0; }
+  .dwaiting{ padding:.8rem; text-align:center; font-size:.9rem; font-weight:600; color:rgba(250,190,88,.95); background:rgba(250,190,88,.06); border-radius:.8rem; border:1px dashed rgba(250,190,88,.35); }
+  .pfoot{ display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:.3rem .7rem; padding-top:.15rem; font-size:.8rem; color:#8d97a3; }
+  .pfoot b{ direction:ltr; font:700 .84rem 'JetBrains Mono',monospace; color:#fff; }
+  .pfoot b.c{ color:#7fb4ff; }
+
+  /* ── Rotating links + QR ── */
+  .links{
+    --c:139,92,246;
+    position:absolute; right:2rem; bottom:2rem; min-width:22rem; max-width:30rem;
+    display:flex; align-items:center; gap:1rem; padding:.8rem 1.2rem .8rem .8rem;
+    border-radius:1.5rem; background:rgba(12,14,20,.88);
+    border:1px solid rgba(var(--c),.6);
+    box-shadow:0 18px 50px rgba(0,0,0,.55), 0 0 36px rgba(var(--c),.22);
+    transition:border-color .5s ease, box-shadow .5s ease;
+    animation: fade-up .8s ease .15s backwards;
+  }
+  .pos-right .links{ right:auto; left:2rem; }
+  .linner{ display:flex; align-items:center; gap:1rem; min-width:0; transition:opacity .35s ease, transform .35s ease; }
+  .links.swap .linner{ opacity:0; transform:translateY(8px); }
+  .lqr{ width:6.6rem; height:6.6rem; flex-shrink:0; border-radius:.85rem; overflow:hidden; background:#fff; box-shadow:0 0 22px rgba(var(--c),.4); }
+  .lqr svg{ display:block; width:100%; height:100%; }
+  .ltext{ display:flex; flex-direction:column; gap:.2rem; min-width:0; }
+  .lname{ font-weight:800; font-size:1.15rem; color:rgb(var(--c)); filter:brightness(1.4); }
+  .lurl{ direction:ltr; text-align:start; font:700 1.25rem 'JetBrains Mono',monospace; color:#fff; overflow-wrap:anywhere; }
+  .lhandle{ direction:ltr; text-align:start; font:500 .8rem 'JetBrains Mono',monospace; color:#8d97a3; }
+  .ldots{ display:flex; gap:.3rem; margin-top:.3rem; direction:ltr; }
+  .ldots i{ width:.45rem; height:.45rem; border-radius:99px; background:rgba(255,255,255,.2); transition:width .3s ease, background .3s ease; }
+  .ldots i.on{ width:1.4rem; background:rgb(var(--c)); }
+
+  /* ── Live donation alert ── */
+  .alert{
+    --ac:250,190,88;
+    position:absolute; top:2.2rem; left:50%; z-index:5; width:min(34rem, 92vw);
+    padding:1.3rem 1.6rem 1.2rem; text-align:center; border-radius:1.9rem;
+    background: radial-gradient(120% 90% at 50% 0%, rgba(var(--ac),.32), rgba(12,14,20,.94) 70%), rgba(12,14,20,.94);
+    border:1px solid rgba(var(--ac),.75);
+    box-shadow:0 20px 70px rgba(0,0,0,.6), 0 0 60px rgba(var(--ac),.45);
+    opacity:0; transform:translate(-50%,-2.2rem) scale(.88); pointer-events:none;
+    transition:opacity .45s ease, transform .65s cubic-bezier(.2,1.2,.3,1);
+  }
+  .alert.crypto{ --ac:59,130,246; }
+  .alert.show{ opacity:1; transform:translate(-50%,0) scale(1); }
+  .aicon{ font-size:3rem; line-height:1; animation:crown-float 2s ease-in-out infinite; filter:drop-shadow(0 0 16px rgba(var(--ac),.95)); }
+  .atitle{ margin-top:.2rem; font-size:.85rem; font-weight:800; letter-spacing:.14em; color:rgb(var(--ac)); filter:brightness(1.35); }
+  .aname{ margin:.2rem 0; padding-block:.06em; font:800 2.3rem/1.45 'Rajdhani','Vazirmatn',sans-serif; overflow-wrap:anywhere; background:linear-gradient(100deg,#fff3c4,#fbbf24 40%,#fffbea 60%,#f59e0b); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent; }
+  .alert.crypto .aname{ background:linear-gradient(100deg,#dbeafe,#60a5fa 40%,#fff 60%,#3b82f6); -webkit-background-clip:text; background-clip:text; }
+  .aamt{ direction:ltr; font:800 1.8rem 'JetBrains Mono',monospace; color:#fff; text-shadow:0 0 22px rgba(var(--ac),.7); }
+  .athx{ margin-top:.45rem; font-size:.95rem; color:#c9d1db; }
+
+  
+  @property --ang { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
+  @keyframes ring { to { --ang: 360deg; } }
+  @keyframes stripes { to { background-position: 28px 0; } }
+  @keyframes sparkle { 0%, 100% { opacity: 0; transform: scale(.3) rotate(0deg); } 50% { opacity: 1; transform: scale(1) rotate(45deg); } }
+  @keyframes name-shine { to { background-position: -220% 0; } }
+  @keyframes champ-glow { 0%, 100% { box-shadow: 0 12px 44px rgba(245,158,11,.38), inset 0 0 36px rgba(250,190,88,.14); } 50% { box-shadow: 0 16px 60px rgba(245,158,11,.62), inset 0 0 46px rgba(250,190,88,.26); } }
+
+  .pod.p1 {
+    isolation: isolate; gap: .55rem; padding: 1.5rem 1.1rem 1.3rem;
+    background:
+      radial-gradient(110% 80% at 50% 0%, rgba(253,224,71,.30), rgba(217,119,6,.10) 55%, transparent 80%),
+      rgba(20,17,12,.82);
+    border: 1px solid rgba(250,190,88,.35);
+    animation: champ-glow 3.6s ease-in-out infinite;
+  }
+  .pod.p1::before {
+    content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 2px; z-index: 2; pointer-events: none;
+    background: conic-gradient(from var(--ang), #fde68a, #f59e0b 22%, rgba(251,191,36,.06) 48%, #fbbf24 74%, #fde68a);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+    animation: ring 4.5s linear infinite;
+  }
+  .pod.p1 .spark {
+    position: absolute; left: var(--x); top: var(--y); z-index: 1; pointer-events: none;
+    font-style: normal; font-size: var(--sz, .9rem); color: #fde68a; opacity: 0;
+    text-shadow: 0 0 10px rgba(253,224,71,.95);
+    animation: sparkle 2.8s ease-in-out var(--d, 0s) infinite;
+  }
+  .pod.p1 .pod-top { flex-direction: column; gap: .35rem; }
+  .pod.p1 .medal { font-size: 2.3rem; line-height: 1; }
+  .pod.p1 .crown-badge {
+    font-size: .64rem; font-weight: 800; letter-spacing: .08em; padding: .22rem .75rem;
+    color: #2b1a00; background: linear-gradient(135deg, #fde047, #d97706);
+    box-shadow: 0 2px 14px rgba(245,158,11,.6);
+  }
+  .pod.p1 .pn {
+    font: 800 1.4rem/1.5 'Rajdhani', 'Vazirmatn', sans-serif; letter-spacing: .02em;
+    padding-block: .08em; width: 100%; text-align: center;
+    white-space: normal; overflow-wrap: anywhere; word-break: break-word;
+    display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden;
+    background: linear-gradient(100deg, #fff3c4 0%, #fbbf24 28%, #fffbea 50%, #f59e0b 72%, #fde68a 100%);
+    background-size: 220% 100%;
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; color: transparent; text-shadow: none;
+    animation: name-shine 5s linear infinite;
+  }
+  .pod.p1 .pa { font: 800 1.5rem/1.1 'JetBrains Mono', monospace; color: #fde68a; text-shadow: 0 0 18px rgba(251,191,36,.55); }
+  .pod.p1 .tunit { font-size: .8rem; color: #fbbf24; }
+
+  @media (min-width: 681px) {
+    .pod.p1 { flex: 1.3; transform: translateY(-6px); }
+    .pod.p1:hover { transform: translateY(-9px); }
+  }
+  @media (max-width: 680px) {
+    .pod.p1 { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 1.4rem 1rem 1.25rem; }
+    .pod.p1 .pn { font-size: 1.5rem; margin: 0; }
+    .pod.p1 .pa { font-size: 1.4rem; }
+  }
+
+  .off-cryptoButton .cr, .off-donateButton .pfoot{ display:none; }
+</style>
+</head>
+<body class="{{off}}">
+<canvas id="confetti"></canvas>
+<div class="stage" id="stage">
+
+  <section class="alert" id="alert" aria-live="polite">
+    <div class="aicon" id="aicon">👑</div>
+    <div class="atitle" id="atitle"></div>
+    <div class="aname" id="aname"></div>
+    <div class="aamt" id="aamt"></div>
+    <div class="athx" id="athx"></div>
+  </section>
+
+  <section class="panel" id="panel">
+    <div class="phead" data-part="goal">
+      <span class="ptitle"><i class="cpulse"></i><span id="ptitle">{{title}}</span></span>
+      <div class="dnums"><b id="dcur">0</b><span>/</span><b id="dgoal">0</b><em id="tomanA">{{currency}}</em></div>
+    </div>
+    <div class="goalname" data-part="goal"><b id="goalLbl">هدف:</b><span id="gname">{{title}}</span></div>
+    <div class="tank" id="tank" data-part="goal">
+      <div class="fill" id="dfill"></div>
+      <i class="tick" style="inset-inline-start:25%"></i><i class="tick" style="inset-inline-start:50%"></i><i class="tick" style="inset-inline-start:75%"></i>
+      <span class="tpct" id="dpct">0%</span>
+    </div>
+    <div class="podium" id="podium" data-part="top"></div>
+    <div class="dlast" id="dlast" data-part="last" hidden>
+      <i class="cpulse"></i><span class="lbl" id="lastLbl">آخرین حمایت:</span><b class="who"></b><span class="amt"></span>
+    </div>
+    <div class="dwaiting" id="dwaiting" hidden></div>
+    <div class="pfoot"><span id="pfootTxt">حمایت:</span><b>{{host}}/donate</b><span class="cr">· <b class="c">{{host}}/crypto ⚡</b></span></div>
+  </section>
+
+  <section class="links" id="links" data-part="links">
+    <div class="linner" id="linner">
+      <div class="lqr" id="lqr"></div>
+      <div class="ltext">
+        <span class="lname" id="lname"></span>
+        <span class="lurl" id="lurl"></span>
+        <span class="lhandle" id="lhandle"></span>
+        <div class="ldots" id="ldots"></div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+(function(){
+  var Q = new URLSearchParams(location.search);
+  var lang = Q.get('lang') === 'en' ? 'en' : 'fa';
+  var root = document.documentElement;
+  root.lang = lang; root.dir = lang === 'fa' ? 'rtl' : 'ltr'; root.setAttribute('data-lang', lang);
+  var scale = parseFloat(Q.get('scale')); if (!(scale >= 0.4 && scale <= 4)) scale = 1;
+  root.style.setProperty('--scale', scale);
+  var SHOW = (Q.get('show') || 'goal,top,last,links,alert').split(',').map(function(s){ return s.trim(); });
+  function has(p){ return SHOW.indexOf(p) !== -1; }
+  var SOUND = Q.get('sound') !== '0';
+  var VOL = parseFloat(Q.get('vol')); if (!(VOL >= 0 && VOL <= 1)) VOL = 0.5;
+  var DEMO = Q.get('demo') === '1';
+  var POLL = Math.max(5, parseInt(Q.get('poll'), 10) || 10) * 1000;
+  var LINK_MS = Math.max(3, parseInt(Q.get('interval'), 10) || 9) * 1000;
+  var HOLD = Math.max(3, parseInt(Q.get('hold'), 10) || 8) * 1000;
+  var HOST = {{hostJson}}, DATA = {{data}};
+  var QRS = DATA.qrs;
+  if (!DATA.donate && Q.get('demo') !== '1') SHOW = SHOW.filter(function(p){ return p === 'links'; });
+
+  var stage = document.getElementById('stage');
+  if (Q.get('pos') === 'right') stage.classList.add('pos-right');
+  if ((!window.obsstudio && Q.get('bg') !== 'none') || Q.get('bg') === 'dark') document.body.classList.add('preview');
+
+  function el(id){ return document.getElementById(id); }
+  var partEls = document.querySelectorAll('[data-part]');
+  for (var pi = 0; pi < partEls.length; pi++){
+    if (!has(partEls[pi].getAttribute('data-part'))) partEls[pi].hidden = true;
+  }
+  if (!has('goal') && !has('top') && !has('last')) el('panel').hidden = true;
+  if (!has('alert')) el('alert').hidden = true;
+
+  var TXT = {
+    fa: { title:DATA.text.fa.title, goal:'هدف:', toman:DATA.text.fa.toman, last:'آخرین حمایت:', top:'حامی طلایی 👑', alert:'حمایت جدید!', alertCrypto:'حمایت کریپتو!', thanks:'ممنون از حمایتت 💛', anon:'ناشناس', first:'اولین حامی باش 💎', sup:'حمایت:' },
+    en: { title:DATA.text.en.title, goal:'Goal:', toman:DATA.text.en.toman, last:'Latest support:', top:'Top Supporter 👑', alert:'NEW SUPPORT!', alertCrypto:'CRYPTO SUPPORT!', thanks:'Thank you so much 💛', anon:'Anonymous', first:'Be the first supporter 💎', sup:'Support:' }
+  };
+  var T = TXT[lang];
+  el('goalLbl').textContent = T.goal; el('tomanA').textContent = T.toman;
+  el('lastLbl').textContent = T.last; el('pfootTxt').textContent = T.sup;
+  el('ptitle').textContent = T.title; el('gname').textContent = T.title;
+  el('dwaiting').textContent = T.first;
+
+  function fmtT(n){ return Number(n || 0).toLocaleString('en-US'); }
+  function ease(p){ return p >= 1 ? 1 : 1 - Math.pow(2, -10 * p); }
+  function countTo(node, to){
+    var from = parseInt((node.textContent || '0').replace(/,/g, ''), 10) || 0, start = null;
+    if (from === to) { node.textContent = fmtT(to); return; }
+    function step(ts){
+      if (start === null) start = ts;
+      var p = Math.min(1, (ts - start) / 1400);
+      node.textContent = fmtT(Math.round(from + (to - from) * ease(p)));
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  // ── Donation panel ──
+  var sigTop = null, sigLast = null;
+  var SPARKS = [['12%','18%','0s','.8rem'], ['86%','24%','.9s','1rem'], ['22%','78%','1.7s','.7rem'], ['78%','74%','.4s','.9rem'], ['50%','8%','1.3s','.75rem']];
+  function buildPodium(top){
+    var sig = JSON.stringify(top);
+    if (sig === sigTop) return;
+    sigTop = sig;
+    var pod = el('podium');
+    pod.innerHTML = '';
+    var medals = ['👑', '🥈', '🥉'];
+    top.forEach(function(d, i){
+      if (!d) return;
+      var box = document.createElement('div');
+      box.className = 'pod p' + (i + 1);
+      box.style.animationDelay = (i * 0.12) + 's';
+      if (i === 0) {
+        SPARKS.forEach(function(q){
+          var s1 = document.createElement('i');
+          s1.className = 'spark'; s1.textContent = '✦';
+          s1.style.setProperty('--x', q[0]); s1.style.setProperty('--y', q[1]);
+          s1.style.setProperty('--d', q[2]); s1.style.setProperty('--sz', q[3]);
+          box.appendChild(s1);
+        });
+      }
+      var topRow = document.createElement('div'); topRow.className = 'pod-top';
+      var m = document.createElement('span'); m.className = 'medal'; m.textContent = medals[i] || '🎖️';
+      topRow.appendChild(m);
+      if (i === 0) {
+        var badge = document.createElement('span'); badge.className = 'crown-badge'; badge.textContent = T.top;
+        topRow.appendChild(badge);
+      }
+      var n = document.createElement('span'); n.className = 'pn'; n.setAttribute('dir', 'auto');
+      n.textContent = (d.crypto ? '⚡ ' : '') + d.name;
+      var a = document.createElement('span'); a.className = 'pa';
+      a.innerHTML = fmtT(d.amount) + ' <em class="tunit">' + T.toman + '</em>';
+      box.appendChild(topRow); box.appendChild(n); box.appendChild(a);
+      pod.appendChild(box);
+    });
+  }
+  function buildLast(last){
+    var sig = JSON.stringify(last);
+    if (sig === sigLast) return;
+    sigLast = sig;
+    var box = el('dlast');
+    if (last && last.name && has('last')) {
+      box.hidden = false;
+      box.querySelector('.who').textContent = (last.crypto ? '⚡ ' : '') + last.name;
+      box.querySelector('.amt').innerHTML = fmtT(last.amount) + ' <em class="tunit">' + T.toman + '</em>';
+    } else {
+      box.hidden = true;
+    }
+  }
+  function render(d){
+    var goal = d.goal || 0, cur = d.current || 0;
+    if (d.title) el('gname').textContent = d.title;
+    var pct = (typeof d.percent === 'number' && d.percent > 0) ? d.percent : (goal > 0 ? (cur / goal) * 100 : 0);
+    el('dfill').style.width = Math.min(100, Math.max(cur > 0 ? 1.5 : 0, pct)) + '%';
+    el('dpct').textContent = (pct > 0 && pct < 1 ? pct.toFixed(1) : Math.floor(pct)) + '%';
+    countTo(el('dcur'), cur);
+    el('dgoal').textContent = fmtT(goal);
+    var top = (d.top || []).slice(0, 3);
+    if (has('top')) buildPodium(top);
+    buildLast(d.last);
+    var hasAny = top.length > 0 || (d.last && d.last.name);
+    el('dwaiting').hidden = Boolean(hasAny) || !(has('top') || has('last'));
+  }
+
+  // ── Alerts (queue, sound, confetti) ──
+  var queue = [], busy = false, ac = null;
+  function chime(){
+    if (!SOUND) return;
+    try {
+      ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+      if (ac.state === 'suspended') ac.resume();
+      var notes = [659.25, 830.61, 987.77, 1318.51];
+      notes.forEach(function(f, i){
+        var t = ac.currentTime + i * 0.11;
+        var o = ac.createOscillator(), g = ac.createGain();
+        o.type = 'triangle'; o.frequency.setValueAtTime(f, t);
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(0.25 * VOL, t + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.6);
+        o.connect(g); g.connect(ac.destination);
+        o.start(t); o.stop(t + 0.65);
+      });
+    } catch (e) {}
+  }
+  var cv = el('confetti'), cx = cv.getContext('2d'), bits = [], running = false;
+  function fit(){ cv.width = window.innerWidth; cv.height = window.innerHeight; }
+  fit(); window.addEventListener('resize', fit);
+  function burst(crypto){
+    var cols = crypto ? ['#3b82f6', '#60a5fa', '#bfdbfe', '#ffffff', '#fbbf24'] : ['#fbbf24', '#f59e0b', '#fde68a', '#ffffff', '#fb7185', '#34d399'];
+    for (var i = 0; i < 170; i++){
+      var ang = Math.random() * Math.PI * 2, sp = 4 + Math.random() * 9;
+      bits.push({ x: cv.width / 2, y: cv.height * 0.2, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp - 4, r: 3 + Math.random() * 5, rot: Math.random() * 6, vr: (Math.random() - 0.5) * 0.4, c: cols[i % cols.length], life: 1 });
+    }
+    if (!running){ running = true; requestAnimationFrame(tick); }
+  }
+  function tick(){
+    cx.clearRect(0, 0, cv.width, cv.height);
+    bits = bits.filter(function(b){ return b.life > 0 && b.y < cv.height + 30; });
+    bits.forEach(function(b){
+      b.vy += 0.22; b.vx *= 0.99; b.x += b.vx; b.y += b.vy; b.rot += b.vr; b.life -= 0.006;
+      cx.save(); cx.globalAlpha = Math.max(0, Math.min(1, b.life * 1.5));
+      cx.translate(b.x, b.y); cx.rotate(b.rot); cx.fillStyle = b.c;
+      cx.fillRect(-b.r, -b.r * 0.5, b.r * 2, b.r); cx.restore();
+    });
+    if (bits.length) requestAnimationFrame(tick); else { running = false; cx.clearRect(0, 0, cv.width, cv.height); }
+  }
+  function showAlert(a){
+    var box = el('alert');
+    box.className = 'alert' + (a.crypto ? ' crypto' : '');
+    el('aicon').textContent = a.crypto ? '⚡' : '👑';
+    el('atitle').textContent = a.crypto ? T.alertCrypto : T.alert;
+    el('aname').textContent = a.name || T.anon;
+    el('aamt').textContent = fmtT(a.amount) + ' ' + T.toman;
+    el('athx').textContent = T.thanks;
+    void box.offsetWidth;
+    box.classList.add('show');
+    chime(); burst(a.crypto);
+  }
+  function pump(){
+    if (busy || !queue.length) return;
+    busy = true;
+    showAlert(queue.shift());
+    setTimeout(function(){
+      el('alert').classList.remove('show');
+      setTimeout(function(){ busy = false; pump(); }, 800);
+    }, HOLD);
+  }
+  function enqueue(a){ if (!has('alert')) return; queue.push(a); pump(); }
+  window.addEventListener('keydown', function(e){
+    if (e.key === 't' || e.key === 'T') enqueue({ name: 'Test', amount: 100000, crypto: false });
+    if (e.key === 'c' || e.key === 'C') enqueue({ name: 'Crypto Test', amount: 500000, crypto: true });
+  });
+
+  var prev = null;
+  function detect(d){
+    if (prev){
+      var inc = (d.current || 0) - (prev.current || 0);
+      if (inc > 0){
+        var lastChanged = d.last && (!prev.last || prev.last.name !== d.last.name || prev.last.amount !== d.last.amount);
+        enqueue({
+          name: d.last ? d.last.name : '',
+          amount: lastChanged ? d.last.amount : inc,
+          crypto: Boolean(d.last && d.last.crypto)
+        });
+      }
+    }
+    prev = d;
+  }
+
+  // ── Data: live from the Worker, or fake data with ?demo=1 ──
+  var demo = { title: DATA.text.fa.title, goal: 5000000, current: 1730000, percent: 0, top: [{ name: 'Ali', amount: 500000 }, { name: 'سارا', amount: 300000 }, { name: 'Reza_Dev', amount: 150000 }], last: { name: 'Reza_Dev', amount: 150000 } };
+  var demoN = 0;
+  function demoFetch(){
+    demoN++;
+    if (demoN > 1 && demoN % 2 === 0){
+      var names = ['Nima', 'Mamad_Linux', 'Hasti', 'Ali', 'یه حامی با اسم خیلی طولانی که جا نمیشه', 'Sara'];
+      var amts = [50000, 100000, 250000, 500000, 1000000];
+      var nm = names[Math.floor(Math.random() * names.length)], am = amts[Math.floor(Math.random() * amts.length)];
+      var crypto = Math.random() < 0.35;
+      demo.current += am;
+      var found = false;
+      demo.top.forEach(function(t){ if (t.name === nm){ t.amount += am; found = true; } });
+      if (!found) demo.top.push({ name: nm, amount: am, crypto: crypto });
+      demo.top.sort(function(x, y){ return y.amount - x.amount; });
+      demo.top = demo.top.slice(0, 3);
+      demo.last = { name: nm, amount: am, crypto: crypto };
+    }
+    demo.percent = parseFloat(((demo.current / demo.goal) * 100).toFixed(1));
+    return JSON.parse(JSON.stringify(demo));
+  }
+  function load(){
+    var p = DEMO
+      ? Promise.resolve(demoFetch())
+      : fetch('/api/donate-stats?live=1&t=' + Date.now(), { cache: 'no-store' }).then(function(r){ return r.json(); });
+    p.then(function(d){
+      if (!d || d.error) return;
+      detect(d); render(d);
+    }).catch(function(){});
+  }
+  load();
+  setInterval(load, DEMO ? 8000 : POLL);
+
+  // ── Rotating links with QR ──
+  var ITEMS = DATA.items;
+  var li = 0;
+  function paintLink(){
+    var it = ITEMS[li];
+    var box = el('links');
+    box.style.setProperty('--c', it.c);
+    el('lqr').innerHTML = QRS[it.k] || '';
+    el('lname').textContent = lang === 'fa' ? it.fa : it.en;
+    el('lurl').textContent = HOST + '/' + it.k;
+    el('lhandle').textContent = it.h;
+    var dots = el('ldots'), html = '';
+    for (var i = 0; i < ITEMS.length; i++) html += '<i' + (i === li ? ' class="on"' : '') + '></i>';
+    dots.innerHTML = html;
+  }
+  if (has('links') && ITEMS.length){
+    paintLink();
+    setInterval(function(){
+      var box = el('links');
+      box.classList.add('swap');
+      setTimeout(function(){ li = (li + 1) % ITEMS.length; paintLink(); box.classList.remove('swap'); }, 380);
+    }, LINK_MS);
+  }
+
+  if (Q.get('test') === '1') setTimeout(function(){ enqueue({ name: 'Test', amount: 100000, crypto: false }); }, 1500);
+})();
+</script>
+</body>
+</html>

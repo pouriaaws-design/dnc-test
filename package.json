@@ -1,0 +1,22 @@
+{
+  "name": "dnc-test",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Your own link-in-bio page on Cloudflare Workers",
+  "license": "SEE LICENSE IN LICENSE.md",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "check": "node scripts/check.mjs"
+  },
+  "devDependencies": {
+    "wrangler": "^4.100.0"
+  },
+  "cloudflare": {
+    "bindings": {
+      "STATS_KV": { "description": "Stores visits, guestbook and scores. A new namespace is created for you." },
+      "STATS_PASSWORD": { "description": "Password for your private `/stats` and `/admin/guestbook` pages. Choose a long one." }
+    }
+  }
+}
